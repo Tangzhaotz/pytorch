@@ -1,0 +1,308 @@
+# pytorch
+# -*- coding: utf-8 -*-
+# @Author  : Tangzhao
+# @Blog:https://blog.csdn.net/tangzhaotz
+
+# tensor概述
+import torch
+x = torch.tensor([1,2])
+y = torch.tensor([3,4])
+z =x.add(y)
+print(z)
+print(x)
+x.add_(y)
+print(x)
+"""
+ensor([4, 6])
+tensor([1, 2])
+tensor([4, 6])
+"""
+
+# 创建tensor
+import torch
+# 根据list数据生成tensor
+torch.Tensor([1,2,3,4,5,6])
+# 根据指定的形状生成tensor
+torch.Tensor(2,3)
+# 根据给定的形状生成tensor
+t = torch.Tensor([[1,2,3],[4,5,6]])
+# 查看tensor的形状
+# t.size()
+# t.shape()
+# 根据已有形状创建tensor
+torch.Tensor(t.size())
+"""
+说明：1、torch.Tensor是torch.empty和torch.tensor之间的一种混合，但是当传入的数据时，torch.Tensor使用全局默认的dtype（FloatTensor），
+而torch.tensor是从数据中推断数据类型
+2、torch.tensor(1)返回一个固定值1，torch.Tensor(1)返回一个大小为1的张量，它是一个随机初始化的值
+"""
+# import torch
+# t1 = torch.Tensor(1)
+# t2 = torch.tensor(1)
+# print('t1的值{}，t1的数据类型{}'.format(t1,t1.type()))
+# print('t2的值{}，t2的数据类型{}'.format(t2,t2.type()))
+"""
+t1的值tensor([0.])，t1的数据类型torch.FloatTensor
+t2的值1，t2的数据类型torch.LongTensor
+"""
+
+# 修改tensor的形状
+"""
+常见函数：
+size（）：计算张量的shape属性值，与函数shape（）等价
+numel（input）：计算Tensor的元素个数
+view（*shape）：修改tensor的形状，与Reshape类似，但是View返回的对象与源Tensor共享内存，修改一个另一个同时更改。reshape生成新的Tensor，
+而且不要求源tensor是连续的，view（-1）展平数组
+resize：类似于view，但是在size超出时会重新分配内存空间
+item：若tensor为单元素，则返回python的标量
+unsqueeze：在指定维度增加一个’1”
+squeeze：在指定维度压缩一个“1”
+"""
+# 实例
+# import torch
+# # 生成一个形状为2x3的矩阵
+# x = torch.randn(2,3)
+# # 查看矩阵的形状
+# print(x.size()) # torch.Size([2, 3])
+# # 查看x的维度
+# print(x.dim())
+# # 将x变成3X2的矩阵
+# print(x.view(3,2))
+# # 把x展开为1维向量
+# y = x.view(-1)
+# print(y.shape)
+# # 添加一个维度
+# z = torch.unsqueeze(y,0)
+# print(z.size())
+# # 计算z的元素个数
+# print(z.numel())
+"""
+2
+tensor([[-1.3292, -1.3983],
+        [-0.2034,  0.5022],
+        [ 0.5219,  0.2384]])
+torch.Size([6])
+torch.Size([1, 6])
+6
+"""
+"""
+说明：torch.view与torch.reshape的异同
+1、reshape（）可以由torch.reshape（）,也可以由torch.Tensor.reshpe()调用，但是view（）只可以由torch.Tensor.view()来调用
+2、对于一个即将被view的tensor，新的size必须与原来的size和stride兼容，否则，在view()之前也必须调用contiguous（）
+"""
+
+# 索引操作
+"""
+index_select(input,dim,index):在指定维度上选择一些行和列
+nonzero(input):获取非0元素的下标
+masked_select():使用二元值进行选择
+gather(input,dim,index):在指定维度上选择数据，输出的形状与index一致
+scatter_(input,dim,index,src):为gather的饭反操作，根据指定索引补充数据
+"""
+# import torch
+# # 设置一个随机种子
+# torch.manual_seed(100)
+# x = torch.randn(2,3)
+# # 根据索引取第一行所有数据
+# print(x[0,:])
+# # 获取最后一列数据
+# print(x[:,-1])
+# # 生成是否大于0的Byter张量
+# mask = x >0
+# torch.masked_select(x,mask)
+# # 获取非0下标
+# torch.nonzero(mask)
+
+# 逐元素操作
+"""
+addcdiv(t,v,t1,t2):t1与t2的按元素除后，乘v加t
+addcmul（t，v，t1，t2）：t1和t2按元素乘后，乘v加t
+ceil/floor：向上/向下取整
+clamp（t，min，max）：将张量元素限定在指定范围区间
+mul/neg:逐元素乘法或者取反
+"""
+
+# 归并操作
+"""
+cumprod(t,axis):对指定维度t进行累积
+cumsum：对指定维度进行累加
+dist（a，b，p=2）：返回a，b之间的p阶范数
+"""
+
+import torch
+a = torch.linspace(0,10,6)
+a = a.view((2,3))
+print(a)
+# 沿y轴方向累加，即dim=0
+b = a.sum(dim=0)
+print(b)
+# 沿y轴方向累加，即dim=0，并保留含1的维度
+b = a.sum(dim=0,keepdim=True)
+print(b)
+"""
+tensor([[ 0.,  2.,  4.],
+        [ 6.,  8., 10.]])
+tensor([ 6., 10., 14.])
+tensor([[ 6., 10., 14.]])
+"""
+
+# tensor与autograd
+# 1、标量反向传播
+"""
+假定x，w，b都是标量，z=wx+b，对标量z调用backward（）方法，我们无需对backward（）传入参数
+"""
+# 定义叶子节点及算子节点
+import torch
+# 定义输入张量
+x = torch.Tensor([2])
+# 初始化参数
+w = torch.randn(1,requires_grad=True)
+b = torch.randn(1,requires_grad=True)
+# 实现反向传播
+y = torch.mul(w,x)
+z = torch.add(y,b)
+# # 查看x,w，b叶子节点的requite_grad属性
+# print("x,w,b的require_grad属性分别为：{},{},{}".format(x.requires_grad(),w.requires_grad(),b.requires_grad())
+# # 查看叶子节点和非叶子节点的其他属性
+# #查看非叶子节点的requres_grad属性,
+# print("y，z的requires_grad属性分别为：{},{}".format(y.requires_grad()),z.requires_grad()))
+# #因与w，b有依赖关系，故y，z的requires_grad属性也是：True,True
+# #查看各节点是否为叶子节点
+# print("x，w，b，y，z的是否为叶子节点：{},{},{},{},{}".format(x.is_leaf,w.is_leaf,b.is_leaf,y.is_leaf,z.is_leaf))
+# #x，w，b，y，z的是否为叶子节点：True,True,True,False,False
+# #查看叶子节点的grad_fn属性
+# print("x，w，b的grad_fn属性：{},{},{}".format(x.grad_fn,w.grad_fn,b.grad_fn))
+# #因x，w，b为用户创建的，为通过其他张量计算得到，故x，w，b的grad_fn属性：None,None,None
+# #查看非叶子节点的grad_fn属性
+# print("y，z的是否为叶子节点：{},{}".format(y.grad_fn,z.grad_fn))
+# #y，z的是否为叶子节点：<MulBackward0 object at 0x7f923e85dda0>,<AddBackward0 object at 0x7f923e85d9b0
+
+# 自动求导，实现梯度反向传播
+# 基于张量z进行梯度反向传播，执行backward之后计算图会自动清空
+z.backward()
+# 如果需要多次使用backward（），需要修改参数retain_graph为True，此时梯度是累加的
+# z.backward(retain_graph=True)
+
+#查看叶子节点的梯度，x是叶子节点但它无须求导，故其梯度为None
+print("参数w,b的梯度分别为:{},{},{}".format(w.grad,b.grad,x.grad))
+#参数w,b的梯度分别为:tensor([2.]),tensor([1.]),None
+
+#非叶子节点的梯度，执行backward之后，会自动清空
+print("非叶子节点y,z的梯度分别为:{},{}".format(y.grad,z.grad))
+#非叶子节点y,z的梯度分别为:None,None
+
+
+# 非标量反向传播
+"""
+pytorch中不让张量对张量求导，只允许标量对张量求导，如果目标张量对一个非标量调用backward，则需要传入一个gradient参数，该参数也是张量，而且需要
+与调用backward（）的张量形状相同
+"""
+# import torch
+# # 定义叶子节点张量x，形状为1x2
+# x = torch.tensor([[2,3]],dtype=torch.float,requires_grad=True)
+# # 初始化雅可比矩阵
+# j = torch.zeros(1,2)
+# # 初始化目标张量
+# y = torch.zeros(1,2)
+# # 定义y与x之间的映射关系
+# #y1=x1**2+3*x2，y2=x2**2+2*x1
+# y[0, 0] = x[0, 0] ** 2 + 3 * x[0 ,1]
+# y[0, 1] = x[0, 1] ** 2 + 2 * x[0, 0]
+#
+# y.backward(torch.Tensor(([[1,1]]))
+# print(x.grad)
+
+
+# numpy实现机器学习
+"""
+首先给出数组x，然后基于表达式y=3x^2 + 2,加上一些噪音数据到达另一组数据y，然后构建一个机器学习模型，学习表达式y=wx^2 + b
+再利用梯度下降法多次迭代
+"""
+# import numpy as np
+# import matplotlib.pyplot as plt
+#
+# # 生成输入数据x和目标数据y
+# # 设置随机种子，生成同一份数据，以便同多种方法进行比较
+# np.random.seed(100)
+# x = np.linspace(-1,1,100).reshape(100,1)
+# y = 3 * np.power(x,2) + 2 + 0.2 * np.random.rand(x.size).reshape(100,1)
+# # 查看数据x和y的分布情况
+# plt.scatter(x,y)
+# plt.show()
+#
+# # 初始化权重参数
+# w1 = np.random.rand(1,1)
+# b1 = np.random.rand(1,1)
+# # 训练模型
+# """
+# 定义损失函数，假设定义批量大小为100
+# """
+# lr = 0.001  # 学习率
+# for i in range(800):
+#     # 前向传播
+#     y_pred = np.power(x,2) * w1 + b1
+#     # 定义损失函数
+#     loss = 0.5 * (y_pred - y) ** 2
+#     loss = loss.sum()
+#
+#     # 计算梯度
+#     grad_w = np.sum((y_pred - y) * np.power(x,2))
+#     grad_b = np.sum((y_pred -y))
+#     # 使用梯度下降，使得loss最小
+#     w1 -= lr * grad_w
+#     b1 -= lr * grad_b
+# # 可视化结果
+# plt.plot(x,y_pred,'r-',label='predict')
+# plt.scatter(x,y,color='blue',marker='o',label='true')  # 真实数据
+# plt.xlim(-1,1)
+# plt.ylim(2,6)
+# plt.legend()
+# plt.show()
+# print(w1,b1)
+
+
+
+# 使用tensor及autograd实现机器学习
+import torch as t
+from matplotlib import pyplot as plt
+
+# 生成训练数据，并可视化
+t.manual_seed(100)
+dtype = t.float
+# 生成x坐标数据，x为tensor，需要把形状转换为100x1
+x = t.unsqueeze(torch.linspace(-1,1,100),dim=1)
+# 生成y坐标数据，y为tensor，形状为100x1,另加上一些噪音
+y = 3 * x.pow(2) + 2 + 0.2 * torch.rand(x.size())
+# 画图
+plt.scatter(x.numpy(),y.numpy())
+plt.show()
+
+# 初始化权重参数
+w = t.randn(1,1,dtype=dtype,requires_grad=True)
+b = t.randn(1,1,dtype=dtype,requires_grad=True)
+
+# 训练模型
+lr = 0.001
+for ii in range(800):
+    y_pred = x.pow(2).mm(w) + b
+    loss = 0.5 * (y_pred -y) ** 2
+    loss = loss.sum()
+    # 计算梯度
+    loss.backward()
+    # 更新参数
+    with t.no_grad():
+        w -= lr * w.grad
+        b -= lr * b.grad
+
+        # 梯度清零
+        w.grad.zero_()
+        b.grad.zero_()
+
+# 可视化结果
+plt.plot(x.numpy(),y_pred.detach().numpy(),'r-',label='predict')
+plt.scatter(x.numpy(),y.numpy(),color='blue',marker='o',label='true')
+plt.xlim(-1,1)
+plt.ylim(2,6)
+plt.legend()
+plt.show()
+print(w,b)
